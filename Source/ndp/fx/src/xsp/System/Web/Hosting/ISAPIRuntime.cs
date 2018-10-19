@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="ISAPIRuntime.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>                                                                
@@ -88,6 +88,10 @@ namespace System.Web.Hosting {
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
     /// <internalonly/>
+    /// <summary>
+    /// ISAPIRuntime是进入.NET托管环境的入口，它在方法中通过一个ecb句柄指向了当前请求报文体的内存地址，
+    /// 将HTTP请求报文简单封装为一个HttpWorkerRequest对象，然后就是各种ProcessRequest方法。
+    /// </summary>
     public sealed class ISAPIRuntime : MarshalByRefObject, IISAPIRuntime, IISAPIRuntime2, IRegisteredObject {
 
         // WARNING: do not modify without making corresponding changes in appdomains.h
@@ -145,6 +149,12 @@ namespace System.Web.Hosting {
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
+        /// <summary>
+        /// 入口方法
+        /// </summary>
+        /// <param name="ecb"></param>
+        /// <param name="iWRType"></param>
+        /// <returns></returns>
         [SecurityPermission(SecurityAction.LinkDemand, Unrestricted = true)] // DevDiv #180492
         public int ProcessRequest(IntPtr ecb, int iWRType) {
             IntPtr pHttpCompletion = IntPtr.Zero;
@@ -155,6 +165,7 @@ namespace System.Web.Hosting {
             ISAPIWorkerRequest wr = null;
             try {
                 bool useOOP = (iWRType == WORKER_REQUEST_TYPE_OOP);
+                // 根据ecb句柄创建HttpWorkerRequest对象封装原始请求报文
                 wr = ISAPIWorkerRequest.CreateWorkerRequest(ecb, useOOP);
                 wr.Initialize();
 
