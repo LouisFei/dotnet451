@@ -7,6 +7,9 @@
     using System.Threading;
     using System.Web.Hosting;
 
+    /// <summary>
+    /// 为 ASP.NET 路由操作提供路由的集合。
+    /// </summary>
     [TypeForwardedFrom("System.Web.Routing, Version=3.5.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
     public class RouteCollection : Collection<RouteBase> {
         private Dictionary<string, RouteBase> _namedMap = new Dictionary<string, RouteBase>(StringComparer.OrdinalIgnoreCase);
@@ -150,6 +153,11 @@
                 VPP.DirectoryExists(requestPath)));
         }
 
+        /// <summary>
+        /// 返回有关集合中与指定值匹配的路由的信息。
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
         public RouteData GetRouteData(HttpContextBase httpContext) {
             if (httpContext == null) {
                 throw new ArgumentNullException("httpContext");

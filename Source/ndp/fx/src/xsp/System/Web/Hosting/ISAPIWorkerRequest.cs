@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="ISAPIWorkerRequest.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -1057,6 +1057,7 @@ internal abstract class ISAPIWorkerRequest : HttpWorkerRequest {
             wr = new ISAPIWorkerRequestOutOfProc(ecb);
         }
         else {
+                //判断当前IIS服务器的版本，然后创建适合不同IIS的具体的WorkerRequest对象。
             int version = UnsafeNativeMethods.EcbGetVersion(ecb) >> 16;
             
             if (version >= 7) {

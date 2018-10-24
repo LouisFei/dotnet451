@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="HttpApplication.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -56,12 +56,51 @@ namespace System.Web {
     public delegate Task TaskEventHandler(object sender, EventArgs e);
 
 
+    /*
+按以下顺序引发的应用程序事件：
+1、BeginRequest
+2、AuthenticateRequest
+3、PostAuthenticateRequest
+4、AuthorizeRequest
+5、PostAuthorizeRequest
+6、ResolveRequestCache
+7、PostResolveRequestCache
+之后PostResolveRequestCache事件之前PostMapRequestHandler事件，创建一个事件处理程序 （这是对应于请求 URL 的页面）。 
+当服务器正在运行 IIS 7.0 集成模式下和在最低.NET Framework 版本 3.0，MapRequestHandler引发事件。 
+当服务器正在运行 IIS 7.0 经典模式下或早期版本的 IIS 时，无法处理此事件。
+
+8、PostMapRequestHandler
+9、AcquireRequestState
+10、PostAcquireRequestState
+11、PreRequestHandlerExecute
+执行事件处理程序。
+
+12、PostRequestHandlerExecute
+13、ReleaseRequestState
+14、PostReleaseRequestState
+之后PostReleaseRequestState引发事件，任何现有的响应筛选器将筛选输出。
+
+15、UpdateRequestCache
+16、PostUpdateRequestCache
+17、LogRequest。
+在 IIS 7.0 集成模式下和在支持此事件最少.NET Framework 3.0
+18、PostLogRequest
+此事件是受支持的 IIS 7.0 集成模式并且至少.NET Framework 3.0
+
+19、EndRequest     
+*/
+
     /// <devdoc>
     ///    <para>
     ///       The  HttpApplication class defines the methods, properties and events common to all
     ///       HttpApplication objects within the ASP.NET Framework.
     ///    </para>
     /// </devdoc>
+    /// 
+    /// <summary>
+    /// 定义对 ASP.NET 应用程序内所有应用程序对象公用的方法、属性和事件。 
+    /// 此类是用户在 Global.asax 文件中定义的应用程序的基类。
+    /// </summary>
     [
     ToolboxItem(false)
     ]
@@ -112,7 +151,7 @@ namespace System.Web {
         private EventHandlerList _events;
         private AsyncAppEventHandlersTable _asyncEvents;
 
-        // execution steps
+        // execution steps execution steps
         private StepManager _stepManager;
 
         // callback for Application ResumeSteps
@@ -190,13 +229,15 @@ namespace System.Web {
         // Public Application properties
         //
 
-
         /// <devdoc>
         ///    <para>
         ///          HTTPRuntime provided context object that provides access to additional
         ///          pipeline-module exposed objects.
         ///       </para>
         ///    </devdoc>
+        /// <summary>
+        /// 获取关于当前请求的 HTTP 特定信息。
+        /// </summary>
         [
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
@@ -263,10 +304,12 @@ namespace System.Web {
             }
         }
 
-
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
+        /// <summary>
+        /// 获取处理所有应用程序事件的事件处理程序委托列表。
+        /// </summary>
         protected EventHandlerList Events {
             get {
                 if (_events == null) {
@@ -442,13 +485,15 @@ namespace System.Web {
             }
         }
 
-
         /// <devdoc>
         ///    <para>
         ///       Collection
         ///          of all IHTTPModules configured for the current application.
         ///       </para>
         ///    </devdoc>
+        /// <summary>
+        /// 获取当前应用程序的模块集合。
+        /// </summary>
         [
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
@@ -761,7 +806,10 @@ namespace System.Web {
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 在 ASP.NET 完成授权事件以使缓存模块从缓存中为请求提供服务后发生，
+        /// 从而绕过事件处理程序（例如某个页或 XML Web services）的执行。
+        /// </summary>
         public event EventHandler PostResolveRequestCache {
             add { AddSyncEventHookup(EventPostResolveRequestCache, value, RequestNotification.ResolveRequestCache, true); }
             remove { RemoveSyncEventHookup(EventPostResolveRequestCache, value, RequestNotification.ResolveRequestCache, true); }
@@ -788,61 +836,80 @@ namespace System.Web {
             remove { RemoveSyncEventHookup(EventPostMapRequestHandler, value, RequestNotification.MapRequestHandler); }
         }
 
-
         /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 当 ASP.NET 获取与当前请求关联的当前状态（如会话状态）时发生。
+        /// </summary>
         public event EventHandler AcquireRequestState {
             add { AddSyncEventHookup(EventAcquireRequestState, value, RequestNotification.AcquireRequestState); }
             remove { RemoveSyncEventHookup(EventAcquireRequestState, value, RequestNotification.AcquireRequestState); }
         }
 
-
         /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PostAcquireRequestState {
             add { AddSyncEventHookup(EventPostAcquireRequestState, value, RequestNotification.AcquireRequestState, true); }
             remove { RemoveSyncEventHookup(EventPostAcquireRequestState, value, RequestNotification.AcquireRequestState, true); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PreRequestHandlerExecute {
             add { AddSyncEventHookup(EventPreRequestHandlerExecute, value, RequestNotification.PreExecuteRequestHandler); }
             remove { RemoveSyncEventHookup(EventPreRequestHandlerExecute, value, RequestNotification.PreExecuteRequestHandler); }
         }
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PostRequestHandlerExecute {
             add { AddSyncEventHookup(EventPostRequestHandlerExecute, value, RequestNotification.ExecuteRequestHandler, true); }
             remove { RemoveSyncEventHookup(EventPostRequestHandlerExecute, value, RequestNotification.ExecuteRequestHandler, true); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler ReleaseRequestState {
             add { AddSyncEventHookup(EventReleaseRequestState, value, RequestNotification.ReleaseRequestState ); }
             remove { RemoveSyncEventHookup(EventReleaseRequestState, value, RequestNotification.ReleaseRequestState); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PostReleaseRequestState {
             add { AddSyncEventHookup(EventPostReleaseRequestState, value, RequestNotification.ReleaseRequestState, true); }
             remove { RemoveSyncEventHookup(EventPostReleaseRequestState, value, RequestNotification.ReleaseRequestState, true); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler UpdateRequestCache {
             add { AddSyncEventHookup(EventUpdateRequestCache, value, RequestNotification.UpdateRequestCache); }
             remove { RemoveSyncEventHookup(EventUpdateRequestCache, value, RequestNotification.UpdateRequestCache); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PostUpdateRequestCache {
             add { AddSyncEventHookup(EventPostUpdateRequestCache, value, RequestNotification.UpdateRequestCache, true); }
             remove { RemoveSyncEventHookup(EventPostUpdateRequestCache, value, RequestNotification.UpdateRequestCache, true); }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler LogRequest {
             add {
                 if (!HttpRuntime.UseIntegratedPipeline) {
@@ -858,6 +925,9 @@ namespace System.Web {
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PostLogRequest {
             add {
                 if (!HttpRuntime.UseIntegratedPipeline) {
@@ -873,14 +943,18 @@ namespace System.Web {
             }
         }
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler EndRequest {
             add { AddSyncEventHookup(EventEndRequest, value, RequestNotification.EndRequest); }
             remove { RemoveSyncEventHookup(EventEndRequest, value, RequestNotification.EndRequest); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler Error {
             add { Events.AddHandler(EventErrorRecorded, value); }
             remove { Events.RemoveHandler(EventErrorRecorded, value); }
@@ -892,20 +966,27 @@ namespace System.Web {
         // have executed.  This may occur before the native processing of the request has completed; for example, before 
         // the final response bytes have been sent to the client.  The HttpContext is not available during this event 
         // because it has already been released.
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler RequestCompleted {
             add { Events.AddHandler(EventRequestCompleted, value); }
             remove { Events.RemoveHandler(EventRequestCompleted, value); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PreSendRequestHeaders {
             add { AddSendResponseEventHookup(EventPreSendRequestHeaders, value); }
             remove { RemoveSendResponseEventHookup(EventPreSendRequestHeaders, value); }
         }
 
 
-        /// <devdoc><para>[To be supplied.]</para></devdoc>
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler PreSendRequestContent {
             add { AddSendResponseEventHookup(EventPreSendRequestContent, value); }
             remove { RemoveSendResponseEventHookup(EventPreSendRequestContent, value); }
@@ -1375,22 +1456,22 @@ namespace System.Web {
             set { _site = value;}
         }
 
-        //
+        // 看这里
         // IHttpAsyncHandler implementation
         //
-
-
         /// <internalonly/>
         IAsyncResult IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData) {
             HttpAsyncResult result;
 
             // Setup the asynchronous stuff and application variables
+            // 设置异步内容和应用程序变量
             _context = context;
             _context.ApplicationInstance = this;
 
             _stepManager.InitRequest();
 
             // Make sure the context stays rooted (including all async operations)
+            // 确保上下文保持根(包括所有异步操作)
             _context.Root();
 
             // Create the async result
@@ -1402,8 +1483,36 @@ namespace System.Web {
             if (_context.TraceIsEnabled)
                 HttpRuntime.Profile.StartRequest(_context);
 
+            //看这里
+            //依次执行各个请求处理管道事件
             // Start the application
             ResumeSteps(null);
+            /*
+             关于请求处理管道：
+HttpApplication 采用处理管道的方法进行处理，将处理的过程分成多个步骤，每个步骤通过事件的形式暴露给程序员，
+这些事件按照固定的处理顺序依次触发，程序员通过编写事件处理方法就可以自定义每一个请求的扩展处理过程。
+对于 HttpApplication 来说，到 ASP.NET 4.0 版本，提供了19 个标准事件，如下图所示：
+BeginRequest ASP.NET开始处理的第一个事件，表示处理的开始。
+AuthenticateRequest 验证请求，一般用来取得请求的用户信息。
+PostAuthenticateRequest 已经获取请求的用户信息
+AuthorizeRequest 授权，一般用来检查用户的请求是否获得权限
+PostAuthorizeRequest 用户请求已经得到授权
+ResolveRequestCache 获取以前处理缓存的处理结果，……
+PostResolveRequestCache
+PostMapRequestHandler
+AcquireRequestState
+PostAcquireRequestState
+PreRequestHandlerExecute 准备执行处理程序
+PostRequestHandlerExecute 已经执行处理程序
+ReleaseRequestState 
+PostReleaseRequestState 
+UpdateRequestCache
+PostUpdateRequestCache
+LogRequest
+PostLogRequest
+EndRequest 本次请求处理完成
+             */
+
 
             // Return the async result
             return result;
@@ -1580,7 +1689,7 @@ namespace System.Web {
                             }
                         }
                         else {
-                            InitModules();
+                            InitModules(); //看这里,一个重要的方法
 
                             // this is used exclusively for integrated mode
                             Debug.Assert(null == _moduleContainers, "null == _moduleContainers");
@@ -1620,6 +1729,7 @@ namespace System.Web {
                         _stepManager = new ApplicationStepManager(this);
                     }
 
+                    //看这里，完成19个请求处理管道事件的注册工作。
                     _stepManager.BuildSteps(_resumeStepsWaitCallback);
                 }
                 finally {
@@ -2200,6 +2310,9 @@ namespace System.Web {
         // Init module list
         //
 
+            /// <summary>
+            /// 遍历HttpModule集合，分别执行初始化操作。
+            /// </summary>
         private void InitModulesCommon() {
             int n = _moduleCollection.Count;
 
@@ -2207,7 +2320,7 @@ namespace System.Web {
                 // remember the module being inited for event subscriptions
                 // we'll later use this for routing
                 _currentModuleCollectionKey = _moduleCollection.GetKey(i);
-                _moduleCollection[i].Init(this);
+                _moduleCollection[i].Init(this); //看这里
             }
 
             _currentModuleCollectionKey = null;
@@ -2220,7 +2333,11 @@ namespace System.Web {
             InitModulesCommon();
         }
 
+        /// <summary>
+        /// 重要的方法，看这里。
+        /// </summary>
         private void InitModules() {
+            //读取Web.config配置文件中的HttpModule集合，
             HttpModulesSection pconfig = RuntimeConfig.GetAppConfig().HttpModules;
 
             // get the static list, then add the dynamic members
@@ -2230,7 +2347,7 @@ namespace System.Web {
             moduleCollection.AppendCollection(dynamicModules);
             _moduleCollection = moduleCollection; // don't assign until all ops have succeeded
 
-            InitModulesCommon();
+            InitModulesCommon(); //看这里
         }
 
         // instantiates modules that have been added to the dynamic registry (classic pipeline)
@@ -2902,6 +3019,9 @@ namespace System.Web {
         }
 
         // interface to represent one execution step
+        /// <summary>
+        /// 表示一个执行步骤的接口
+        /// </summary>
         internal interface IExecutionStep {
             void Execute();
             bool CompletedSynchronously { get;}
@@ -3665,6 +3785,7 @@ namespace System.Web {
                 if (urlMappingsEnabled)
                     steps.Add(new UrlMappingsExecutionStep(app)); // url mappings
 
+                //以下代码完成19个事件的注册工作。
                 app.CreateEventExecutionSteps(HttpApplication.EventBeginRequest, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventAuthenticateRequest, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventDefaultAuthentication, steps);
@@ -3691,7 +3812,8 @@ namespace System.Web {
                 steps.Add(new NoopExecutionStep()); // the last is always there
 
                 _execSteps = new IExecutionStep[steps.Count];
-                steps.CopyTo(_execSteps);
+                steps.CopyTo(_execSteps); //执行步骤保存到一个数组列表中。
+                //便于后面的BeginProcessRequest方法内部调用ResumeSteps方法依次执行这些对象的Execute()方法，完成各个事件的执行。
 
                 // callback for async completion when reposting to threadpool thread
                 _resumeStepsWaitCallback = stepCallback;

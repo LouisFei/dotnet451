@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="WorkerRequest.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>                                                                
@@ -38,8 +38,14 @@ namespace System.Web {
 
 
     /// <devdoc>
-    ///    <para>This abstract class defines the base worker methods and enumerations used by ASP.NET managed code for request processing.</para>
+    ///    <para>This abstract class defines the base worker methods and enumerations used by ASP.NET managed code for request processing.
+    ///          此抽象类定义由 ASP.NET 托管代码用于处理请求的基本辅助方法和枚举。   
+    ///    </para>
     /// </devdoc>
+    /// <summary>
+    /// 在Asp.Net中准备用于处理的请求，都必须封装为HttpWorkerRequest类型的对象，
+    /// HttpWorkerRequest是一个抽象类。
+    /// </summary>
     [ComVisible(false)]
     public abstract class HttpWorkerRequest {
         private DateTime _startTime;

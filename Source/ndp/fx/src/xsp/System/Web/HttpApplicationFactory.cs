@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="HttpApplicationFactory.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>                                                                
@@ -355,7 +355,7 @@ namespace System.Web {
         private HttpApplication GetNormalApplicationInstance(HttpContext context) {
             HttpApplication app = null;
 
-            lock (_freeList) {
+            lock (_freeList) { //HttpApplication池（Stack栈）
                 if (_numFreeAppInstances > 0) {
                     app = (HttpApplication)_freeList.Pop();
                     _numFreeAppInstances--;
@@ -368,10 +368,12 @@ namespace System.Web {
 
             if (app == null) {
                 // If ran out of instances, create a new one
+                // 如果实例用完了，创建一个新的实例
+                // 内部是通过反射的方式将Global文件所编译的类封装出来一个HttpApplication实例。
                 app = (HttpApplication)HttpRuntime.CreateNonPublicInstance(_theApplicationType);
 
                 using (new ApplicationImpersonationContext()) {
-                    app.InitInternal(context, _state, _eventHandlerMethods);
+                    app.InitInternal(context, _state, _eventHandlerMethods); //看这里
                 }
             }
 
@@ -650,6 +652,7 @@ namespace System.Web {
 
             _theApplicationFactory.EnsureInited();
 
+            //保证全局事件Application_Start只执行一次，内部有标识标记。
             _theApplicationFactory.EnsureAppStartCalled(context);
 
             return _theApplicationFactory.GetNormalApplicationInstance(context);

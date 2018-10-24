@@ -5,6 +5,13 @@
     using System.Web;
     using System.Runtime.CompilerServices;
 
+    /// <summary>
+    /// 提供用于定义路由及获取路由相关信息的属性和方法。
+    /// Route类可用于指定如何路由在 ASP.NET 应用程序中处理。
+    /// 创建Route对象想要将映射到类来处理每个 URL 模式请求它们分别对应于该模式。 
+    /// 然后，添加到路由Routes集合。 
+    /// 当应用程序收到请求时，ASP.NET 路由循环中的路由Routes集合以找到与 URL 的模式匹配的第一个路由。
+    /// </summary>
     [TypeForwardedFrom("System.Web.Routing, Version=3.5.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
     public class Route : RouteBase {
         private const string HttpMethodParameterName = "httpMethod";

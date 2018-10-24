@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="HttpContext.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -460,6 +460,7 @@ namespace System.Web {
         // ctor used in HttpRuntime
         internal HttpContext(HttpWorkerRequest wr, bool initResponseWriter) {
             _wr = wr;
+            //两个重要的对象将被创建：HttpRequest和HttpResponse
             Init(new HttpRequest(wr, this), new HttpResponse(wr, this));
 
             if (initResponseWriter)

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="HttpRuntime.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -1474,7 +1474,7 @@ namespace System.Web {
                     }
 
                     context.Response.InitResponseWriter();
-                    handler = HttpApplicationFactory.GetApplicationInstance(context);
+                    handler = HttpApplicationFactory.GetApplicationInstance(context); //看这里
                     if (handler == null)
                         throw new HttpException(SR.GetString(SR.Unable_create_app_object));
 
@@ -1609,10 +1609,13 @@ namespace System.Web {
             }
         }
 
-
         /*
          * Process one request
          */
+        /// <summary>
+        /// 重要的对象将要被创建：HttpContext
+        /// </summary>
+        /// <param name="wr"></param>
         private void ProcessRequestInternal(HttpWorkerRequest wr) {
             // Count active requests
             Interlocked.Increment(ref _activeRequestCount);
@@ -1637,9 +1640,11 @@ namespace System.Web {
             }
 
             // Construct the Context on HttpWorkerRequest, hook everything together
+            // 在HttpWorkerRequest上构建上下文，将所有内容连接在一起
             HttpContext context;
 
             try {
+                //创建Http上下文
                 context = new HttpContext(wr, false /* initResponseWriter */);
             } 
             catch {
@@ -1681,7 +1686,8 @@ namespace System.Web {
                 context.Response.InitResponseWriter();
 
                 // Get application instance
-                IHttpHandler app = HttpApplicationFactory.GetApplicationInstance(context);
+                // 通过HttpApplicationFactory得到一个具体的HttpApplication实例。 
+                IHttpHandler app = HttpApplicationFactory.GetApplicationInstance(context); //看这里
 
                 if (app == null)
                     throw new HttpException(SR.GetString(SR.Unable_create_app_object));
@@ -1689,13 +1695,16 @@ namespace System.Web {
                 if (EtwTrace.IsTraceEnabled(EtwTraceLevel.Verbose, EtwTraceFlags.Infrastructure)) EtwTrace.Trace(EtwTraceType.ETW_TYPE_START_HANDLER, context.WorkerRequest, app.GetType().FullName, "Start");
 
                 if (app is IHttpAsyncHandler) {
-                    // asynchronous handler
+                    // asynchronous handler 异步处理程序
                     IHttpAsyncHandler asyncHandler = (IHttpAsyncHandler)app;
                     context.AsyncAppHandler = asyncHandler;
-                    asyncHandler.BeginProcessRequest(context, _handlerCompletionCallback, context);
+
+                    asyncHandler.BeginProcessRequest(context, _handlerCompletionCallback, context);//看这里
+                    //通过BeginProcessRequest方法，触发了ResumeSteps方法依次执行每个请求处理管道事件，
+                    //也就进入了我们所说的“请求处理管道”中。
                 }
                 else {
-                    // synchronous handler
+                    // synchronous handler 同步处理程序
                     app.ProcessRequest(context);
                     FinishRequest(context.WorkerRequest, context, null);
                 }
@@ -2367,16 +2376,20 @@ namespace System.Web {
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="wr"></param>
         internal static void ProcessRequestNoDemand(HttpWorkerRequest wr) {
             RequestQueue rq = _theRuntime._requestQueue;
 
             wr.UpdateInitialCounters();
 
             if (rq != null)  // could be null before first request
-                wr = rq.GetRequestToExecute(wr);
+                wr = rq.GetRequestToExecute(wr); //从请求队列中取出一个请求
 
             if (wr != null) {
-                CalculateWaitTimeAndUpdatePerfCounter(wr);
+                CalculateWaitTimeAndUpdatePerfCounter(wr); //更新请求的引用计数器的信息
                 wr.ResetStartTime();
                 ProcessRequestNow(wr);
             }

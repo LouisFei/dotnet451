@@ -2,6 +2,9 @@
     using System.Runtime.CompilerServices;
     using System.Diagnostics.CodeAnalysis;
 
+    /// <summary>
+    /// 封装有关与已定义路由匹配的 HTTP 请求的信息。
+    /// </summary>
     [TypeForwardedFrom("System.Web.Routing, Version=3.5.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
     public class RequestContext {
         public RequestContext() {
